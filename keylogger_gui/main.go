@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 
+	"github.com/reinoj/go_keylogger/keylogger_gui/setupgrid"
+
 	"github.com/gotk3/gotk3/gtk"
 )
 
@@ -16,24 +18,22 @@ func main() {
 	if err != nil {
 		log.Fatal("Unable to create window:", err)
 	}
-	win.SetTitle("Simple Example")
+	win.SetTitle("Keylogger GUI")
 	win.Connect("destroy", func() {
 		gtk.MainQuit()
 	})
 
-	// Create a new label widget to show in the window.
-	l, err := gtk.LabelNew("Hello, gotk3!")
+	grid, err := gtk.GridNew()
 	if err != nil {
-		log.Fatal("Unable to create label:", err)
+		log.Fatal("Unable to create grid:", err)
 	}
 
-	// Add the label to the window.
-	win.Add(l)
+	setupgrid.SetupKeyboard(grid)
 
-	// Set the default window size.
-	win.SetDefaultSize(800, 600)
+	grid.SetRowSpacing(5)
+	grid.SetColumnSpacing(5)
 
-	// Recursively show all widgets contained in this window.
+	win.Add(grid)
 	win.ShowAll()
 
 	// Begin executing the GTK main loop.  This blocks until
