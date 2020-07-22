@@ -14,3 +14,7 @@
 # ignore glade test stuff
 *.glade
 *.galde~
+
+# png and gimp files
+*.png
+*.xcf
