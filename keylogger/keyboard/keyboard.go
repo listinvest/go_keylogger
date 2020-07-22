@@ -128,6 +128,11 @@ var KeyIndex = make(map[int]int)
 // Keys is an int slice of the relevant keys
 var Keys []int
 
+// UpdateCounts opens the count file, updates the count for each key, and closes it
+func UpdateCounts() {
+	//
+}
+
 func init() {
 	// appends the key to the slice and then sorts it
 	for key := range VirtualKeyCodes {
