@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/reinoj/go_keylogger/keylogger_gui/setupgrid"
@@ -22,21 +23,42 @@ func main() {
 	win.Connect("destroy", func() {
 		gtk.MainQuit()
 	})
+	// 1765 x 395 window size
 
 	grid, err := gtk.GridNew()
 	if err != nil {
 		log.Fatal("Unable to create grid:", err)
 	}
 
+	grid.SetMarginTop(10)
+	grid.SetMarginBottom(10)
+	grid.SetMarginStart(10)
+	grid.SetMarginEnd(10)
+
 	setupgrid.SetupKeyboard(grid)
 
 	grid.SetRowSpacing(5)
 	grid.SetColumnSpacing(5)
+	grid.SetColumnHomogeneous(true)
+	grid.SetRowHomogeneous(true)
 
-	win.Add(grid)
+	// img, err := gtk.ImageNewFromFile("red_opacity_test.png")
+	// if err != nil {
+	// 	log.Fatal("Unable to load image:", err)
+	// }
+
+	winGrid, err := gtk.GridNew()
+	if err != nil {
+		log.Fatal("Unable to create grid:", err)
+	}
+
+	// winGrid.Attach(img, 0, 0, 1, 1)
+	winGrid.Attach(grid, 0, 0, 1, 1)
+	win.Add(winGrid)
 	win.ShowAll()
 
-	// Begin executing the GTK main loop.  This blocks until
-	// gtk.MainQuit() is run.
+	width, height := win.GetSize()
+	fmt.Printf("width: %d\theight: %d\n", width, height)
+
 	gtk.Main()
 }
