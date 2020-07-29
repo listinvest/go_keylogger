@@ -1,9 +1,13 @@
 package keyboard
 
-import "sort"
+import (
+	"fmt"
+	"sort"
+	"sync"
+)
 
 // NumKeys is the number of virtual keycodes being checked
-const NumKeys = 103
+const NumKeys = 107
 
 // VirtualKeyCodes is a map from the int code to a string name of the code
 var VirtualKeyCodes = map[int]string{
@@ -120,7 +124,7 @@ var VirtualKeyCodes = map[int]string{
 var IsKeyActive [NumKeys]bool
 
 // TimesPressed counts the number of times the key at each index is pressed
-var TimesPressed [NumKeys]uint64
+// var TimesPressed [NumKeys]uint64
 
 // KeyIndex is a map that takes in the hex and returns the index of that hex in the array
 var KeyIndex = make(map[int]int)
@@ -129,8 +133,12 @@ var KeyIndex = make(map[int]int)
 var Keys []int
 
 // UpdateCounts opens the count file, updates the count for each key, and closes it
-func UpdateCounts() {
+func UpdateCounts(wg *sync.WaitGroup, curCounts []uint64) {
 	//
+	defer wg.Done()
+	for i, count := range curCounts {
+		fmt.Printf("%d: %d\n", i, count)
+	}
 }
 
 func init() {
