@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/reinoj/go_keylogger/keylogger_gui/setupgrid"
-
 	"github.com/gotk3/gotk3/gtk"
+	"github.com/reinoj/go_keylogger/keylogger_gui/setupgrid"
 )
 
 func main() {
