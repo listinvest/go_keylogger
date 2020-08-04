@@ -12,6 +12,17 @@ import (
 	"golang.org/x/sys/windows"
 )
 
+// func clickHandle() {
+// 	for {
+// 		fmt.Printf("got here\n")
+// 		var msg win.MSG
+// 		for win.GetMessage(&msg, 0, 0, 0) != 0 {
+// 			win.TranslateMessage(&msg)
+// 			win.DispatchMessage(&msg)
+// 		}
+// 	}
+// }
+
 func main() {
 	// sleep at the beginning to get rid of some initial erroneous data
 	time.Sleep(1 * time.Second)
@@ -37,6 +48,7 @@ func main() {
 	if hWnd == win.NULL {
 		log.Fatal(win.GetLastError())
 	}
+	win.ShowWindow(hWnd, win.SW_HIDE)
 
 	nid, err := keyboard.NewNotifyIcon(hWnd)
 	if err != nil {
@@ -55,6 +67,7 @@ func main() {
 
 	var wg sync.WaitGroup
 
+	// time.Sleep(10 * time.Second)
 	// stores active keys from most recent cycle
 	var CurrentlyActiveKeys [keyboard.NumKeys]bool
 
@@ -62,7 +75,16 @@ func main() {
 	var resetCount bool = true
 	var lastUpdate time.Time = time.Now()
 
+	// go clickHandle()
+
 	for c := 0; c < 500; c++ {
+		// need to move this message loop somehow so it doesn't block the rest of the function
+		var msg win.MSG
+		result := win.GetMessage(&msg, 0, 0, 0)
+		if result != 0 {
+			win.TranslateMessage(&msg)
+			win.DispatchMessage(&msg)
+		}
 		// for {
 		// start := time.Now()
 
