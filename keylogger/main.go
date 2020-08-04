@@ -2,36 +2,56 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"sync"
 	"time"
 	"unsafe"
 
-	"golang.org/x/sys/windows"
-
 	"github.com/hallazzang/go-windows-programming/pkg/win"
 	"github.com/reinoj/go_keylogger/keylogger/keyboard"
+	"golang.org/x/sys/windows"
 )
-
-func getNotifyIconData() *win.NOTIFYICONDATA {
-	desktopHWnd, _, _ := keyboard.GetDesktopWindow.Call()
-	var nid win.NOTIFYICONDATA
-	nid.CbSize = uint32(unsafe.Sizeof(nid))
-	nid.UFlags = win.NIF_GUID
-	nid.HWnd = desktopHWnd
-	nid.GuidItem = keyboard.NewGUID()
-	return &nid
-}
 
 func main() {
 	// sleep at the beginning to get rid of some initial erroneous data
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 
-	nid := getNotifyIconData()
-	icon, _, _ := keyboard.LoadImageW.Call(win.NULL, uintptr(unsafe.Pointer(windows.StringToUTF16Ptr("icon32.ico"))), win.IMAGE_ICON, 0, 0, win.LR_DEFAULTSIZE)
-	nid.HIcon = icon
-	nid.UFlags |= win.NIF_ICON
-	success, _, _ := keyboard.ShellNotifyIconW.Call(uintptr(win.NIM_ADD), uintptr(unsafe.Pointer(&nid)))
-	fmt.Printf("%#X\n", success)
+	hInstance := win.GetModuleHandle(nil)
+
+	wndClass := windows.StringToUTF16Ptr("MyWindow")
+
+	var wcex win.WNDCLASSEX
+	wcex.CbSize = uint32(unsafe.Sizeof(wcex))
+	wcex.Style = win.CS_HREDRAW | win.CS_VREDRAW
+	wcex.LpfnWndProc = windows.NewCallback(keyboard.WndProc)
+	wcex.HInstance = hInstance
+	wcex.HCursor = win.LoadCursor(0, win.MAKEINTRESOURCE(win.IDC_ARROW))
+	wcex.HbrBackground = win.COLOR_WINDOW + 1
+	wcex.LpszClassName = wndClass
+	atom := win.RegisterClassEx(&wcex)
+	if atom == 0 {
+		log.Println(win.GetLastError())
+	}
+
+	hWnd := win.CreateWindowEx(0, wndClass, windows.StringToUTF16Ptr("Go Keylogger"), win.WS_OVERLAPPEDWINDOW, win.CW_USEDEFAULT, win.CW_USEDEFAULT, 100, 100, 0, 0, hInstance, nil)
+	if hWnd == win.NULL {
+		log.Fatal(win.GetLastError())
+	}
+
+	nid, err := keyboard.NewNotifyIcon(hWnd)
+	if err != nil {
+		log.Println(err)
+	}
+	defer nid.Dispose()
+
+	hIcon, err := keyboard.LoadIconFromFile("icon.ico")
+	if err != nil {
+		log.Println(err)
+	}
+	defer win.DestroyIcon(hIcon)
+
+	nid.SetIcon(hIcon)
+	nid.SetTooltip("Go Keylogger")
 
 	var wg sync.WaitGroup
 
@@ -82,7 +102,7 @@ func main() {
 
 	fmt.Printf("Waiting for all updates to finish...\n")
 	wg.Wait()
-	_, _, _ = keyboard.DestroyIcon.Call(icon)
-	_, _, _ = keyboard.ShellNotifyIconW.Call(win.NIM_DELETE, uintptr(unsafe.Pointer(&nid)))
+	// _, _, _ = keyboard.DestroyIcon.Call(icon)
+	// _, _, _ = keyboard.ShellNotifyIconW.Call(win.NIM_DELETE, uintptr(unsafe.Pointer(&nid)))
 	fmt.Printf("All updates finished.\n")
 }
