@@ -13,12 +13,14 @@ import (
 
 var (
 	user32 = syscall.NewLazyDLL("user32.dll")
+	// CreateWindowExW creates window
+	CreateWindowExW = user32.NewProc("CreateWindowExW")
 	// GetAsyncKeyState gets state of specified key
 	GetAsyncKeyState = user32.NewProc("GetAsyncKeyState")
 	// GetDesktopWindow gets hwnd to desktop window
 	GetDesktopWindow = user32.NewProc("GetDesktopWindow")
-	// CreateWindowExW creates window
-	CreateWindowExW = user32.NewProc("CreateWindowExW")
+	// PeekMessageW non blocking version of GetMessage
+	PeekMessageW = user32.NewProc("PeekMessageW")
 )
 
 const notifyIconMsg = win.WM_APP + 1
@@ -31,8 +33,14 @@ type NotifyIcon struct {
 	guid win.GUID
 }
 
-// NewGUID creates a guid for the icon, probably
+func iconMenu() {
+	log.Println("Right clicked icon")
+}
+
 // https://github.com/hallazzang/go-windows-programming/blob/master/example/gui/notifyicon/notifyicon.go
+// Function below are from the main package of their example
+
+// NewGUID creates a guid for the icon, probably
 func NewGUID() win.GUID {
 	var buf [16]byte
 	rand.Read(buf[:])
@@ -40,7 +48,6 @@ func NewGUID() win.GUID {
 }
 
 // NewNotifyIcon returns the notifyIcon for the keylogger
-// https://github.com/hallazzang/go-windows-programming/blob/master/example/gui/notifyicon/notifyicon.go
 func NewNotifyIcon(hwnd uintptr) (*NotifyIcon, error) {
 	ni := &NotifyIcon{
 		hwnd: hwnd,
@@ -56,7 +63,6 @@ func NewNotifyIcon(hwnd uintptr) (*NotifyIcon, error) {
 }
 
 // NewData returns the NOTIFYICONDATA of the keylogger
-// https://github.com/hallazzang/go-windows-programming/blob/master/example/gui/notifyicon/notifyicon.go
 func (ni *NotifyIcon) NewData() *win.NOTIFYICONDATA {
 	var nid win.NOTIFYICONDATA
 	nid.CbSize = uint32(unsafe.Sizeof(nid))
@@ -66,6 +72,7 @@ func (ni *NotifyIcon) NewData() *win.NOTIFYICONDATA {
 	return &nid
 }
 
+// SetIcon comment to shut up the linter
 func (ni *NotifyIcon) SetIcon(hIcon uintptr) error {
 	data := ni.NewData()
 	data.UFlags |= win.NIF_ICON
@@ -76,10 +83,12 @@ func (ni *NotifyIcon) SetIcon(hIcon uintptr) error {
 	return nil
 }
 
+// Dispose comment to shut up the linter
 func (ni *NotifyIcon) Dispose() {
 	win.Shell_NotifyIcon(win.NIM_DELETE, ni.NewData())
 }
 
+// LoadIconFromFile comment to shut up the linter
 func LoadIconFromFile(name string) (uintptr, error) {
 	hIcon := win.LoadImage(
 		win.NULL,
@@ -94,6 +103,7 @@ func LoadIconFromFile(name string) (uintptr, error) {
 	return hIcon, nil
 }
 
+// SetTooltip comment to shut up the linter
 func (ni *NotifyIcon) SetTooltip(tooltip string) error {
 	data := ni.NewData()
 	data.UFlags |= win.NIF_TIP
@@ -104,6 +114,7 @@ func (ni *NotifyIcon) SetTooltip(tooltip string) error {
 	return nil
 }
 
+// ShowNotificationWithIcon comment to shut up the linter
 func (ni *NotifyIcon) ShowNotificationWithIcon(title, text string, hIcon uintptr) error {
 	data := ni.NewData()
 	data.UFlags |= win.NIF_INFO
@@ -116,10 +127,7 @@ func (ni *NotifyIcon) ShowNotificationWithIcon(title, text string, hIcon uintptr
 	return nil
 }
 
-func iconMenu() {
-	log.Println("Right clicked icon")
-}
-
+// WndProc comment to shut up the linter
 func WndProc(hWnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 	switch msg {
 	case notifyIconMsg:

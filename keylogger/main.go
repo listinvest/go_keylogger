@@ -12,17 +12,6 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// func clickHandle() {
-// 	for {
-// 		fmt.Printf("got here\n")
-// 		var msg win.MSG
-// 		for win.GetMessage(&msg, 0, 0, 0) != 0 {
-// 			win.TranslateMessage(&msg)
-// 			win.DispatchMessage(&msg)
-// 		}
-// 	}
-// }
-
 func main() {
 	// sleep at the beginning to get rid of some initial erroneous data
 	time.Sleep(1 * time.Second)
@@ -75,17 +64,15 @@ func main() {
 	var resetCount bool = true
 	var lastUpdate time.Time = time.Now()
 
-	// go clickHandle()
-
+	// for {
 	for c := 0; c < 500; c++ {
 		// need to move this message loop somehow so it doesn't block the rest of the function
 		var msg win.MSG
-		result := win.GetMessage(&msg, 0, 0, 0)
+		result, _, _ := keyboard.PeekMessageW.Call(uintptr(unsafe.Pointer(&msg)), 0, 0, 0, 0)
 		if result != 0 {
 			win.TranslateMessage(&msg)
 			win.DispatchMessage(&msg)
 		}
-		// for {
 		// start := time.Now()
 
 		if resetCount {
@@ -124,7 +111,5 @@ func main() {
 
 	fmt.Printf("Waiting for all updates to finish...\n")
 	wg.Wait()
-	// _, _, _ = keyboard.DestroyIcon.Call(icon)
-	// _, _, _ = keyboard.ShellNotifyIconW.Call(win.NIM_DELETE, uintptr(unsafe.Pointer(&nid)))
 	fmt.Printf("All updates finished.\n")
 }
