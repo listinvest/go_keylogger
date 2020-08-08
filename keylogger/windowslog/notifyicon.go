@@ -1,27 +1,15 @@
-package keyboard
+package windowslog
 
 import (
 	"crypto/rand"
 	"errors"
-	"log"
-	"syscall"
 	"unsafe"
 
 	"github.com/hallazzang/go-windows-programming/pkg/win"
 	"golang.org/x/sys/windows"
 )
 
-var (
-	user32 = syscall.NewLazyDLL("user32.dll")
-	// CreateWindowExW creates window
-	CreateWindowExW = user32.NewProc("CreateWindowExW")
-	// GetAsyncKeyState gets state of specified key
-	GetAsyncKeyState = user32.NewProc("GetAsyncKeyState")
-	// GetDesktopWindow gets hwnd to desktop window
-	GetDesktopWindow = user32.NewProc("GetDesktopWindow")
-	// PeekMessageW non blocking version of GetMessage
-	PeekMessageW = user32.NewProc("PeekMessageW")
-)
+// https://github.com/hallazzang/go-windows-programming/blob/master/example/gui/notifyicon/notifyicon.go
 
 const notifyIconMsg = win.WM_APP + 1
 
@@ -32,13 +20,6 @@ type NotifyIcon struct {
 	hwnd uintptr
 	guid win.GUID
 }
-
-func iconMenu() {
-	log.Println("Right clicked icon")
-}
-
-// https://github.com/hallazzang/go-windows-programming/blob/master/example/gui/notifyicon/notifyicon.go
-// Function below are from the main package of their example
 
 // NewGUID creates a guid for the icon, probably
 func NewGUID() win.GUID {
@@ -88,21 +69,6 @@ func (ni *NotifyIcon) Dispose() {
 	win.Shell_NotifyIcon(win.NIM_DELETE, ni.NewData())
 }
 
-// LoadIconFromFile comment to shut up the linter
-func LoadIconFromFile(name string) (uintptr, error) {
-	hIcon := win.LoadImage(
-		win.NULL,
-		windows.StringToUTF16Ptr(name),
-		win.IMAGE_ICON,
-		0, 0,
-		win.LR_DEFAULTSIZE|win.LR_LOADFROMFILE)
-	if hIcon == win.NULL {
-		return 0, win.GetLastError()
-	}
-
-	return hIcon, nil
-}
-
 // SetTooltip comment to shut up the linter
 func (ni *NotifyIcon) SetTooltip(tooltip string) error {
 	data := ni.NewData()
@@ -125,20 +91,4 @@ func (ni *NotifyIcon) ShowNotificationWithIcon(title, text string, hIcon uintptr
 		return errShellNotifyIcon
 	}
 	return nil
-}
-
-// WndProc comment to shut up the linter
-func WndProc(hWnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
-	switch msg {
-	case notifyIconMsg:
-		switch nmsg := win.LOWORD(uint32(lParam)); nmsg {
-		case win.WM_LBUTTONDOWN:
-			iconMenu()
-		}
-	case win.WM_DESTROY:
-		win.PostQuitMessage(0)
-	default:
-		return win.DefWindowProc(hWnd, msg, wParam, lParam)
-	}
-	return 0
 }

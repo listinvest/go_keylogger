@@ -1,9 +1,7 @@
-package keyboard
+package windowslog
 
 import (
-	"fmt"
 	"sort"
-	"sync"
 )
 
 // NumKeys is the number of virtual keycodes being checked
@@ -131,15 +129,6 @@ var KeyIndex = make(map[int]int)
 
 // Keys is an int slice of the relevant keys
 var Keys []int
-
-// UpdateCounts opens the count file, updates the count for each key, and closes it
-func UpdateCounts(wg *sync.WaitGroup, curCounts []uint64) {
-	//
-	defer wg.Done()
-	for i, count := range curCounts {
-		fmt.Printf("%d: %d\n", i, count)
-	}
-}
 
 func init() {
 	// appends the key to the slice and then sorts it
