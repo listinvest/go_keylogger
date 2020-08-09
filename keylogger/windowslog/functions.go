@@ -1,8 +1,12 @@
 package windowslog
 
 import (
+	"encoding/csv"
 	"fmt"
+	"io"
 	"log"
+	"os"
+	"strconv"
 	"sync"
 	"syscall"
 	"unsafe"
@@ -33,9 +37,39 @@ func PeekMessage() {
 	}
 }
 
+func csvRead() [NumKeys]uint64 {
+	var totals [NumKeys]uint64
+	file, err := os.OpenFile("key_totals.csv", os.O_RDWR, 0644)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			log.Fatalln("Unable to open csv file: ", err)
+		}
+	}
+	defer file.Close()
+
+	i := 0
+	csvReader := csv.NewReader(file)
+	for {
+		val, err := csvReader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalln("Problem reading csv file: ", err)
+		}
+		num, err := strconv.ParseUint(val[1], 10, 64)
+		if err != nil {
+			log.Fatalln("Problem parsing number in csv file: ", err)
+		}
+		totals[i] = num
+		i++
+	}
+
+	return totals
+}
+
 // UpdateCounts opens the count file, updates the count for each key, and closes it
 func UpdateCounts(wg *sync.WaitGroup, curCounts []uint64) {
-	//
 	defer wg.Done()
 	for i, count := range curCounts {
 		fmt.Printf("%d: %d\n", i, count)
