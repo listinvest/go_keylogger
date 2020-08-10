@@ -2,7 +2,6 @@ package windowslog
 
 import (
 	"encoding/csv"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -27,6 +26,9 @@ var (
 	PeekMessageW = user32.NewProc("PeekMessageW")
 )
 
+var currentFile string = "key_totals.csv"
+var oldFile string = "old_key_totals.csv"
+
 // PeekMessage uses the PeekMessageW proc to listen for certain events
 func PeekMessage() {
 	var msg win.MSG
@@ -39,13 +41,14 @@ func PeekMessage() {
 
 func csvRead() [NumKeys]uint64 {
 	var totals [NumKeys]uint64
-	file, err := os.OpenFile("key_totals.csv", os.O_RDWR, 0644)
+	file, err := os.OpenFile(currentFile, os.O_RDWR, 0644)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			log.Fatalln("Unable to open csv file: ", err)
+			log.Fatal("Unable to open csv file: ", err)
+		} else {
+			return totals
 		}
 	}
-	defer file.Close()
 
 	i := 0
 	csvReader := csv.NewReader(file)
@@ -55,25 +58,66 @@ func csvRead() [NumKeys]uint64 {
 			break
 		}
 		if err != nil {
-			log.Fatalln("Problem reading csv file: ", err)
+			log.Fatal("Problem reading csv file: ", err)
 		}
 		num, err := strconv.ParseUint(val[1], 10, 64)
 		if err != nil {
-			log.Fatalln("Problem parsing number in csv file: ", err)
+			log.Fatal("Problem parsing number in csv file: ", err)
 		}
 		totals[i] = num
 		i++
 	}
 
+	file.Close()
 	return totals
 }
 
-// UpdateCounts opens the count file, updates the count for each key, and closes it
-func UpdateCounts(wg *sync.WaitGroup, curCounts []uint64) {
-	defer wg.Done()
-	for i, count := range curCounts {
-		fmt.Printf("%d: %d\n", i, count)
+func addTotals(totals, current [NumKeys]uint64) [NumKeys]uint64 {
+	var newTotal [NumKeys]uint64
+	for i := 0; i < NumKeys; i++ {
+		newTotal[i] = totals[i] + current[i]
 	}
+	return newTotal
+}
+
+func csvWrite(newTotals [NumKeys]uint64) {
+	if err := os.Remove(oldFile); err != nil {
+		if !os.IsNotExist(err) {
+			log.Fatal("Unable to remove old csv file: ", err)
+		}
+	}
+
+	if err := os.Rename(currentFile, oldFile); err != nil {
+		if !os.IsNotExist(err) {
+			log.Fatal("Unable to rename file: ", err)
+		}
+	}
+
+	file, err := os.OpenFile(currentFile, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		log.Fatal("Error opening file for writing: ", err)
+	}
+	csvWriter := csv.NewWriter(file)
+
+	for i := 0; i < NumKeys; i++ {
+		record := []string{VirtualKeyCodes[Keys[i]], strconv.FormatUint(newTotals[i], 10)}
+		if err = csvWriter.Write(record); err != nil {
+			log.Fatal("Error writing to csv file: ", err)
+		}
+	}
+	csvWriter.Flush()
+	if err := csvWriter.Error(); err != nil {
+		log.Fatal("Error after flushing writer: ", err)
+	}
+	file.Close()
+}
+
+// UpdateCounts opens the count file, updates the count for each key, and closes it
+func UpdateCounts(wg *sync.WaitGroup, current [NumKeys]uint64) {
+	totals := csvRead()
+	newTotals := addTotals(totals, current)
+	csvWrite(newTotals)
+	wg.Done()
 }
 
 // WndProc comment to shut up the linter
@@ -94,6 +138,13 @@ func WndProc(hWnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 
 func iconMenu() {
 	log.Println("Right clicked icon")
+}
+
+// ResetCount resets the uint64 array to 0s
+func ResetCount(currentCount *[NumKeys]uint64) {
+	for i := 0; i < NumKeys; i++ {
+		currentCount[i] = 0
+	}
 }
 
 // https://github.com/hallazzang/go-windows-programming/blob/master/example/gui/notifyicon/main.go

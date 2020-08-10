@@ -40,9 +40,11 @@ func main() {
 	// stores active keys from most recent cycle
 	var CurrentlyActiveKeys [windowslog.NumKeys]bool
 
-	var currentCount []uint64
-	var resetCount bool = true
-	var lastUpdate time.Time = time.Now()
+	var currentCount [windowslog.NumKeys]uint64
+	resetCount := true
+	lastUpdate := time.Now()
+
+	TESTCOUNT := 0
 
 	for {
 		// for c := 0; c < 500; c++ {
@@ -50,7 +52,8 @@ func main() {
 		windowslog.PeekMessage()
 
 		if resetCount {
-			currentCount = make([]uint64, windowslog.NumKeys)
+			// currentCount = make([]uint64, windowslog.NumKeys)
+			windowslog.ResetCount(&currentCount)
 			resetCount = false
 			lastUpdate = time.Now()
 		}
@@ -73,12 +76,15 @@ func main() {
 			}
 		}
 		// 1 minute in nanoseconds
-		if time.Since(lastUpdate) >= 60_000_000_000 {
-			fmt.Println("One minute passed")
+		// if time.Since(lastUpdate) >= 60_000_000_000 {
+		if time.Since(lastUpdate) >= 15_000_000_000 {
 			wg.Add(1)
 			go windowslog.UpdateCounts(&wg, currentCount)
 			resetCount = true
-			break
+			TESTCOUNT++
+			if TESTCOUNT > 2 {
+				break
+			}
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
