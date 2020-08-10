@@ -114,7 +114,7 @@ var VirtualKeyCodes = map[int]string{
 	0xC0: "Backtick/Tilde",
 	0xDB: "Left Bracket/Left Brace",
 	0xDC: "Vertical Bar/Back Slash",
-	0xDD: "Right Bracket/ Right Brace",
+	0xDD: "Right Bracket/Right Brace",
 	0xDE: "Single Quote/Double Quote",
 }
 

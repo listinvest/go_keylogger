@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	setupgrid.GetImage()
 	// Initialize GTK without parsing any command line arguments.
 	gtk.Init(nil)
 
@@ -41,17 +42,17 @@ func main() {
 	grid.SetColumnHomogeneous(true)
 	grid.SetRowHomogeneous(true)
 
-	// img, err := gtk.ImageNewFromFile("red_opacity_test.png")
-	// if err != nil {
-	// 	log.Fatal("Unable to load image:", err)
-	// }
+	img, err := gtk.ImageNewFromFile("heatmap.png")
+	if err != nil {
+		log.Fatal("Unable to load image:", err)
+	}
 
 	winGrid, err := gtk.GridNew()
 	if err != nil {
 		log.Fatal("Unable to create grid:", err)
 	}
 
-	// winGrid.Attach(img, 0, 0, 1, 1)
+	winGrid.Attach(img, 0, 0, 1, 1)
 	winGrid.Attach(grid, 0, 0, 1, 1)
 	win.Add(winGrid)
 	win.ShowAll()
