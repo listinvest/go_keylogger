@@ -3,12 +3,12 @@ package setupgrid
 import (
 	"encoding/csv"
 	"image"
-	"image/png"
 	"io"
 	"log"
 	"os"
 	"strconv"
 
+	"github.com/disintegration/imaging"
 	"github.com/dustin/go-heatmap"
 	"github.com/dustin/go-heatmap/schemes"
 )
@@ -52,13 +52,14 @@ func GetImage() {
 
 	scheme := schemes.Classic
 	img := heatmap.Heatmap(image.Rect(0, 0, 1765, 395), points, 150, 128, scheme)
-	imgFile, err := os.Create("heatmap.png")
-	if err != nil {
-		log.Fatal("Error creating image: ", err)
-	}
-	if err := png.Encode(imgFile, img); err != nil {
-		imgFile.Close()
+	// imgFile, err := os.Create("heatmap.png")
+	// if err != nil {
+	// 	log.Fatal("Error creating image: ", err)
+	// }
+	// if err := png.Encode(imgFile, img); err != nil {
+	if err := imaging.Save(img, "heatmap.png"); err != nil {
+		// imgFile.Close()
 		log.Fatal("Error encoding image: ", err)
 	}
-	imgFile.Close()
+	// imgFile.Close()
 }

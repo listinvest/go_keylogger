@@ -57,6 +57,9 @@ func main() {
 	win.Add(winGrid)
 	win.ShowAll()
 
+	colSpacing := grid.GetColumnSpacing()
+	rowSpacing := grid.GetRowSpacing()
+	fmt.Printf("Spacing:\nColumn: %d\tRow: %d\n", colSpacing, rowSpacing)
 	width, height := win.GetSize()
 	fmt.Printf("width: %d\theight: %d\n", width, height)
 
