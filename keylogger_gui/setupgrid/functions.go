@@ -2,7 +2,6 @@ package setupgrid
 
 import (
 	"encoding/csv"
-	"fmt"
 	"image"
 	"io"
 	"log"
@@ -45,7 +44,7 @@ func GetImage() {
 		for j := uint64(0); j < num; j++ {
 			center := centers[val[0]]
 			if center != nil {
-				fmt.Printf("Center: %f, %f\n", center.X(), center.Y())
+				// fmt.Printf("Center: %f, %f\n", center.X(), center.Y())
 				points = append(points, center)
 			}
 		}
