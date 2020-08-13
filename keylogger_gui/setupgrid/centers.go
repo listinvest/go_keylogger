@@ -3,6 +3,7 @@ package setupgrid
 import "github.com/dustin/go-heatmap"
 
 var centers = map[string]heatmap.DataPoint{
+	"Test": heatmap.P(100.0, 100.0),
 	// 1st row
 	"Escape":       heatmap.P(44.0, 37.0),
 	"F1":           heatmap.P(169.0, 37.0),
@@ -43,8 +44,9 @@ var centers = map[string]heatmap.DataPoint{
 	"Multiply":        heatmap.P(1644.0, 117.0),
 	"Subtract":        heatmap.P(1719.0, 117.0),
 	// 3rd row
-	"Tab":                       heatmap.P(69.0, 177.0),
-	"Q":                         heatmap.P(169.0, 177.0),
+	"Tab": heatmap.P(69.0, 177.0),
+	// "Q":                         heatmap.P(169.0, 177.0),
+	"Q":                         heatmap.P(95.0, 102.0),
 	"W":                         heatmap.P(244.0, 177.0),
 	"E":                         heatmap.P(319.0, 177.0),
 	"R":                         heatmap.P(394.0, 177.0),

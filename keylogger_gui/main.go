@@ -34,13 +34,12 @@ func main() {
 	grid.SetMarginBottom(10)
 	grid.SetMarginStart(10)
 	grid.SetMarginEnd(10)
-
-	setupgrid.SetupKeyboard(grid)
-
 	grid.SetRowSpacing(5)
 	grid.SetColumnSpacing(5)
 	grid.SetColumnHomogeneous(true)
 	grid.SetRowHomogeneous(true)
+
+	setupgrid.SetupKeyboard(grid)
 
 	img, err := gtk.ImageNewFromFile("heatmap.png")
 	if err != nil {
@@ -57,9 +56,6 @@ func main() {
 	win.Add(winGrid)
 	win.ShowAll()
 
-	colSpacing := grid.GetColumnSpacing()
-	rowSpacing := grid.GetRowSpacing()
-	fmt.Printf("Spacing:\nColumn: %d\tRow: %d\n", colSpacing, rowSpacing)
 	width, height := win.GetSize()
 	fmt.Printf("width: %d\theight: %d\n", width, height)
 

@@ -2,6 +2,7 @@ package setupgrid
 
 import (
 	"encoding/csv"
+	"fmt"
 	"image"
 	"io"
 	"log"
@@ -44,14 +45,17 @@ func GetImage() {
 		for j := uint64(0); j < num; j++ {
 			center := centers[val[0]]
 			if center != nil {
+				fmt.Printf("Center: %f, %f\n", center.X(), center.Y())
 				points = append(points, center)
 			}
 		}
 	}
+	points = append(points, heatmap.P(0.0, 0.0))
+	points = append(points, heatmap.P(1765.0, 395.0))
 	file.Close()
 
 	scheme := schemes.Classic
-	img := heatmap.Heatmap(image.Rect(0, 0, 1765, 395), points, 150, 128, scheme)
+	img := heatmap.Heatmap(image.Rect(0, 0, 1765, 395), points, 150, 64, scheme, false)
 	// imgFile, err := os.Create("heatmap.png")
 	// if err != nil {
 	// 	log.Fatal("Error creating image: ", err)
