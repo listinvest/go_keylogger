@@ -49,8 +49,6 @@ func GetImage() {
 			}
 		}
 	}
-	points = append(points, heatmap.P(0.0, 0.0))
-	points = append(points, heatmap.P(1765.0, 395.0))
 	file.Close()
 
 	scheme := schemes.Classic
